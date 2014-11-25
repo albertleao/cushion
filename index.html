@@ -1,0 +1,55 @@
+<!doctype html>
+
+<html lang="en">
+	<head>
+	  <meta charset="utf-8">
+
+		<title>Cushion</title>
+		<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+		<script src="cushion-config.js"></script>
+		<script src="cushion-custom-functions.js"></script>
+		<script src="cushion-functions.js"></script>
+		<script src="cushion.js"></script>
+
+	  
+	</head>
+<body>
+
+
+	<h3>Loading data via ajax</h3>
+	<a href="page.html" data-ajax="true" data-target="#target">
+		Click
+	</a>
+
+	<div id="target">
+		Target
+	</div>
+
+	<h3>Unhide the hidden div below</h3>
+	<a href="#" data-ajax="true" data-show="#hide">
+		Click
+	</a>
+
+	<div id="hide" style="display: none">hidden</div>
+
+
+	<h3>Hide the visible div below</h3>
+	<a href="#" data-ajax="true" data-hide="#show">
+		Click
+	</a>
+	<div id="show">show</div>
+
+	<h3>Toggle the div below</h3>
+	<a href="#" data-ajax="true" data-toggle="#toggle">
+		Click
+	</a>
+	<div id="toggle">Toggle</div>
+
+	<h3>Dynamically loading and reloading content automatically</h3>
+	<a href="#" data-ajax="true" data-reload="#reload">
+		Reload
+	</a>
+	<div id="reload" data-loaded="false" data-load="page.html">Before Initial Load</div>
+
+	</body>
+</html>
