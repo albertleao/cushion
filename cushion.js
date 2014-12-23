@@ -1,3 +1,16 @@
+
+var config = {
+	content: '#content',
+	loadingAnimation: '<img src="ajax-loader.gif">',
+	baseUrl: '',
+}
+
+
+/*********************************************************************************************************/
+/******************************************* CUSHION.JS **************************************************/
+/*********************************************************************************************************/
+
+$models = {}
 //EXECUTE DYNALOADER ON DOCUMENT LOAD
 $(document).ready(function(){
 	if($("#cushion-default-output").length == 0) {
@@ -5,6 +18,7 @@ $(document).ready(function(){
 		$("#cushion-default-output").css({'position' : 'absolute', 'top' : '-9999px', 'left' : '-9999px'})
 	}
 	dynaLoader();
+	loadModels()
 })
 
 //Handle Click Event
@@ -21,11 +35,23 @@ $(document).on("click", "a", function(a){
 	} else {
 		actions(object)
 	}
+	loadModels();
 })
+
+$(document).on("keydown change", "input[cs-model]",function(){
+	loadModels()
+})
+function loadModels() {
+	$("input[cs-model]").each(function(i, ele) {
+		var modelName = $(ele).attr('cs-model')
+		var modelValue = $(ele).val()
+		$models[modelName] = modelValue;
+	})
+}
 
 function ajaxify(object) {
 	if(object.data('history') !== false){
-		//create_history(object)
+		createHistory(object)
 	}
 	ajaxGet(object)
 }
@@ -33,19 +59,21 @@ function ajaxify(object) {
 function handleHistory() {
 	if(history.pushState) {
 		if(history.state == null) {
-			var path = $(location).attr('pathname')
+			var path = config.baseurl
 		} else {
 			var path = history.state
 		}
+		object = {}
 		$.ajax({
 			url: config.baseurl + path,
-			success:function(result) {
-				$(config.content).html(result);
+			success:function(data, textStatus, xhr) {
+				$(config.content).html(data);
+				cushionAjaxComplete(data, textStatus, xhr)
 			},
 			complete:function() {
 				dynaLoader()
 			}
-		} 
+		}) 
 	}
 }
 //POPSTATE on history change
@@ -53,7 +81,8 @@ window.setTimeout(function() {
 	$(window).bind('popstate', function(e) {
 		handleHistory(e);
 	})
-}, 5000);
+}, 1000);
+
 //HASHCHANGE
 $(window).on("hashchange", function() {
     if (currentlySettingHash) {
@@ -78,13 +107,11 @@ $(window).on("hashchange", function() {
 });
 function createHistory(object) {
 	var new_url = object.attr('href') == 'undefined' ? object.data('href') : object.attr('href')
-	if(config.platform == 'browser') {
-		if(history.pushState) {
-			window.history.pushState(new_url, "", new_url);
-		}
-		else {
-			window.location.hash = new_url;
-		}
+	if(history.pushState) {
+		window.history.pushState(new_url, "", new_url);
+	}
+	else {
+		window.location.hash = new_url;
 	}
 }
 
@@ -118,10 +145,8 @@ function ajaxGet(object){
 $(document).on("submit", "form", function(a){
 	if($(this).data("ajax") == true) {
 		a.preventDefault();
-		var posting = false;
-
 		object = $(this)
-
+		object.find('button').attr('disabled', 'disabled')
 		var fd = new FormData();
 		if(object.find('input[type="file"]')[0] != undefined) {
 			var file_data = $(this).find('input[type="file"]')[0].files; // for multiple files
@@ -143,20 +168,20 @@ $(document).on("submit", "form", function(a){
 
 		$.ajax({
 			type: "POST",
-			url: config.baseUrl + object.attr("action"),
+			url: object.attr("action"),
 			data: serializedData,
 			beforeSend:function(xhr, plainObject){
 				cushionAjaxBeforeSend(xhr, plainObject, object);
 				cushionAjaxPostBeforeSend(xhr, plainObject, object);
 			},
 			success:function(data, textStatus, xhr) {
-				handleOutput(object,data)
-				cushionAjaxSuccess(data, textStatus, xhr)
+				cushionAjaxSuccess(data, textStatus, xhr, object)
 				cushionAjaxPostSuccess(data, textStatus, xhr)
 			},
 			complete:function(xhr, textStatus){
 				cushionAjaxComplete(xhr, textStatus, object)
 				cushionAjaxPostComplete(xhr, textStatus, object)
+				object.find('button').attr('disabled', false)
 			},
 			error:function(jqXhr, textStatus, errorThrown){
 				cushionAjaxError(textStatus, jqXhr, errorThrown, object);
@@ -204,4 +229,84 @@ function reload(object) {
 		$(object.data("reload")).attr('data-loaded', 'false');
 		dynaLoader();
 	}, 500)
+}
+
+
+/*********************************************************************************************************/
+/********************************************** ACTIONS **************************************************/
+/*********************************************************************************************************/
+
+
+
+function actions(object) {
+	//Hide Object
+	if(object.data('hide') != undefined){
+		if(object.data('hide') == 'this') {
+			$(object).hide()
+		} else {
+			$(object.data('hide')).hide()
+		}
+	}
+
+	//Show Object
+	if(object.data('show') != undefined) {
+		if(object.data('show') == 'this') {
+			$(object).show()
+		} else {
+			$(object.data('show')).show()
+		}
+	}
+
+	//Toggle Classes
+	if(object.data('toggle-class') != undefined && object.data('toggle-class-target') != undefined) {
+		$(object.data('toggleClassTarget')).toggleClass(object.data('toggleClass'))
+	}
+
+	//Toggle Object
+	if(object.data('toggle') != undefined) {
+		$(object.data('toggle')).toggle()
+	}
+	
+	//Toggle Classes
+	if(object.data('empty') != undefined){
+		if(object.data('empty') == 'this') {
+			$(object).empty()
+		} else {
+			$(object.data('empty')).empty()
+		}
+	}
+	//Navigate
+	if(object.data('navigate') == 'back') {
+		history.back()
+	}
+
+	customActions(object);
+}
+
+function handleOutput(object, data) {
+	//Chosen Target
+	if(object.data('target') && object.data('target') != 'this'){
+		if(object.data('show') != false){
+			$(object.data('target')).hide().html(data).show();
+		}
+	}
+	//Replace Current
+	else if(object.data('target') == 'this') {
+		object.replaceWith(data)
+	} 
+	else if(object.data('load') != undefined) {
+		object.html(data)
+	}
+	else {
+		$("#cushion-default-output").html(data)
+	}
+}
+
+function handleAnimation(object) {
+	if(object.data('target') && object.data('target') != 'this'){
+			$(object.data('target')).html(config.loadingAnimation)
+	}
+	else if(object.data('target') == 'this') {
+		object.replaceWith(config.loadingAnimation)
+	}
 }
