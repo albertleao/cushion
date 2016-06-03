@@ -1,55 +1,29 @@
-<!doctype html>
-
+<!DOCTYPE html>
 <html lang="en">
-	<head>
-	  <meta charset="utf-8">
+<head>
+	<meta charset="UTF-8">
+	<title>Cushion Test</title>
+	<script   src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   crossorigin="anonymous"></script>
+	<script src="cushion.js"></script>
+	<script src="cushion-hooks.js"></script>
 
-		<title>Cushion</title>
-		<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-		<script src="cushion-config.js"></script>
-		<script src="cushion-custom-functions.js"></script>
-		<script src="cushion-functions.js"></script>
-		<script src="cushion.js"></script>
-
-	  
-	</head>
+	<script type="text/javascript">
+		cushionInitialize({
+			baseUrl: '',
+			loadingAnimation: 'loading...',
+			history: "hash",
+			content: '#content'
+		})
+	</script>
+</head>
 <body>
+	<div data-load="/autoload.html"></div>
 
-
-	<h3>Loading data via ajax</h3>
-	<a href="page.html" data-ajax="true" data-target="#target">
-		Click
+	<hr>
+	
+	<a href="/get.html" data-ajax="true" data-target="#get">
+		Click here
 	</a>
-
-	<div id="target">
-		Target
-	</div>
-
-	<h3>Unhide the hidden div below</h3>
-	<a href="#" data-ajax="true" data-show="#hide">
-		Click
-	</a>
-
-	<div id="hide" style="display: none">hidden</div>
-
-
-	<h3>Hide the visible div below</h3>
-	<a href="#" data-ajax="true" data-hide="#show">
-		Click
-	</a>
-	<div id="show">show</div>
-
-	<h3>Toggle the div below</h3>
-	<a href="#" data-ajax="true" data-toggle="#toggle">
-		Click
-	</a>
-	<div id="toggle">Toggle</div>
-
-	<h3>Dynamically loading and reloading content automatically</h3>
-	<a href="#" data-ajax="true" data-reload="#reload">
-		Reload
-	</a>
-	<div id="reload" data-loaded="false" data-load="page.html">Before Initial Load</div>
-
-	</body>
+	<div id="get"></div>
+</body>
 </html>
